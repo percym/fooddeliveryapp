@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "117003813389",
+    "project_id": "ecommerce-android-5e074",
+    "storage_bucket": "ecommerce-android-5e074.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117003813389:android:0b5f9eedf7bffce0db8b44",
+        "android_client_info": {
+          "package_name": "dev.percym.fooddeliveryapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFqVX_RbNmjn-Nk0KarqiyW2ofJEk1sDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117003813389:android:c83aaf95bbd70135db8b44",
+        "android_client_info": {
+          "package_name": "net.mdev.shopping"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFqVX_RbNmjn-Nk0KarqiyW2ofJEk1sDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
