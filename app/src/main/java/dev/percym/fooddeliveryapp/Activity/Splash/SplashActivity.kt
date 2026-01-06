@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import dev.percym.fooddeliveryapp.Activity.BaseActivity
-import dev.percym.fooddeliveryapp.MainActivity
+import dev.percym.fooddeliveryapp.Activity.Dashboard.MainActivity
 import dev.percym.fooddeliveryapp.R
 
 
@@ -43,7 +43,10 @@ class SplashActivity : BaseActivity() {
 @Preview
 fun SplashScreen(onGetStartedClick:()->Unit={}){
 
-    Column(modifier = Modifier.fillMaxSize().background(color = colorResource(R.color.darkBrown))) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = colorResource(R.color.darkBrown))) {
         ConstraintLayout(modifier = Modifier.padding(top=48.dp)) {
             val(backgroundImg, logImg)=createRefs()
             Image(

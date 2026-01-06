@@ -1,4 +1,4 @@
-package dev.percym.fooddeliveryapp
+package dev.percym.fooddeliveryapp.Activity.Dashboard
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
