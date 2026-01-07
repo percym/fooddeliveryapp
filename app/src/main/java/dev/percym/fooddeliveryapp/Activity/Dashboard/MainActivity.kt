@@ -1,47 +1,38 @@
 package dev.percym.fooddeliveryapp.Activity.Dashboard
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import dev.percym.fooddeliveryapp.ui.theme.FoodDeliveryAPPTheme
+import dev.percym.fooddeliveryapp.Activity.BaseActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            FoodDeliveryAPPTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            MainScreen()
+
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FoodDeliveryAPPTheme {
-        Greeting("Android")
+    @Composable
+    fun MainScreen() {
+        val scaffoldState= rememberScaffoldState()
+        Scaffold(
+            bottomBar = { MyBottomBar() },
+            scaffoldState = scaffoldState
+        ) {
+            paddingValues ->
+            LazyColumn(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues= paddingValues)){}
+        }
     }
 }
