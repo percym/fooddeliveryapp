@@ -47,7 +47,7 @@ fun TopBar() {
         Column(
             modifier = Modifier.constrainAs(name) {
                 top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
                 end.linkTo(notification.start)
             },
             horizontalAlignment = Alignment.CenterHorizontally
