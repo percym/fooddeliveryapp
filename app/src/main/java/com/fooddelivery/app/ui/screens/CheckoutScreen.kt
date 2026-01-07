@@ -3,6 +3,7 @@ package com.fooddelivery.app.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fooddelivery.app.viewmodel.FoodViewModel
@@ -26,6 +28,8 @@ fun CheckoutScreen(
     var address by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var instructions by remember { mutableStateOf("") }
+    var addressError by remember { mutableStateOf(false) }
+    var phoneError by remember { mutableStateOf(false) }
     
     val deliveryFee = 2.99
     val serviceFee = 1.99
@@ -72,20 +76,41 @@ fun CheckoutScreen(
                     
                     OutlinedTextField(
                         value = address,
-                        onValueChange = { address = it },
+                        onValueChange = { 
+                            address = it
+                            addressError = it.isBlank() || it.length < 10
+                        },
                         label = { Text("Delivery Address") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = false,
-                        minLines = 2
+                        minLines = 2,
+                        isError = addressError && address.isNotBlank(),
+                        supportingText = {
+                            if (addressError && address.isNotBlank()) {
+                                Text("Please enter a complete delivery address")
+                            }
+                        }
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     OutlinedTextField(
                         value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
+                        onValueChange = { 
+                            if (it.length <= 15) {
+                                phoneNumber = it.filter { char -> char.isDigit() || char in "+-() " }
+                                phoneError = it.isNotBlank() && it.filter { char -> char.isDigit() }.length < 10
+                            }
+                        },
                         label = { Text("Phone Number") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        isError = phoneError,
+                        supportingText = {
+                            if (phoneError) {
+                                Text("Please enter a valid phone number")
+                            }
+                        }
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
@@ -145,13 +170,18 @@ fun CheckoutScreen(
             // Place Order Button
             Button(
                 onClick = {
-                    viewModel.clearCart()
                     onOrderPlaced()
+                    viewModel.clearCart()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = address.isNotBlank() && phoneNumber.isNotBlank()
+                enabled = address.isNotBlank() && 
+                         phoneNumber.isNotBlank() && 
+                         !addressError && 
+                         !phoneError &&
+                         address.length >= 10 &&
+                         phoneNumber.filter { it.isDigit() }.length >= 10
             ) {
                 Text(
                     text = "Place Order",

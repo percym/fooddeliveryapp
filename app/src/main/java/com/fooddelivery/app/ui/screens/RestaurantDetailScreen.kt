@@ -67,7 +67,7 @@ fun RestaurantDetailScreen(
                 // Restaurant Info
                 RestaurantInfoSection(rest)
                 
-                Divider()
+                HorizontalDivider()
                 
                 // Menu Section
                 Text(
