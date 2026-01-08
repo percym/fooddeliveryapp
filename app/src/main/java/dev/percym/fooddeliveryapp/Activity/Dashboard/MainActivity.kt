@@ -54,6 +54,7 @@ class MainActivity : BaseActivity() {
                 .padding(paddingValues= paddingValues)){
                 item { TopBar() }
                 item { Banner(banners, showBannerLoading  ) }
+                item { Search() }
             }
         }
     }
