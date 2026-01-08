@@ -1,6 +1,5 @@
 package dev.percym.fooddeliveryapp.Activity.Dashboard
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -70,7 +69,7 @@ fun AutoSlidingCarousel(
                 .height(150.dp),
             contentAlignment = Alignment.Center
         ) {
-            // optional placeholder UI
+            CircularProgressIndicator()
         }
         return
     }
@@ -78,7 +77,6 @@ fun AutoSlidingCarousel(
     Column(modifier = modifier.fillMaxSize()) {
         HorizontalPager(count = banners.size, state = pagerState) { page ->
             val url = banners[page].image
-            Log.i("Banner", "Banner URL: $url")
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(url)
