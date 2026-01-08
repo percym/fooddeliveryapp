@@ -13,7 +13,7 @@ class MainRepository {
 
     fun loadBanner(): LiveData<MutableSet<BannerModel>> {
         val listData= MutableLiveData<MutableSet<BannerModel>>()
-        val ref= firebaseDatabase.getReference("Banners ")
+        val ref= firebaseDatabase.getReference("Banners")
 
         ref.addValueEventListener(object :ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -26,11 +26,12 @@ class MainRepository {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                System.out.printf(error.message)
             }
 
 
         })
+        System.out.printf(listData.toString())
     return listData
 
     }

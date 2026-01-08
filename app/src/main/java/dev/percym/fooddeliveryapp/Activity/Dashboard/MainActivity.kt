@@ -3,14 +3,23 @@ package dev.percym.fooddeliveryapp.Activity.Dashboard
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.percym.fooddeliveryapp.Activity.BaseActivity
+import dev.percym.fooddeliveryapp.Domain.BannerModel
+import dev.percym.fooddeliveryapp.ViewModel.MainViewModel
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +34,16 @@ class MainActivity : BaseActivity() {
     @Composable
     fun MainScreen() {
         val scaffoldState= rememberScaffoldState()
+        val banners= remember { mutableStateListOf<BannerModel>() }
+        var showBannerLoading by remember { mutableStateOf(true) }
+        val viewModel= MainViewModel()
+        LaunchedEffect(Unit) {
+            viewModel.loadBanner().observeForever {
+                banners.clear()
+                banners.addAll(it)
+                showBannerLoading = false
+            }
+        }
         Scaffold(
             bottomBar = { MyBottomBar() },
             scaffoldState = scaffoldState
@@ -34,6 +53,7 @@ class MainActivity : BaseActivity() {
                 .fillMaxSize()
                 .padding(paddingValues= paddingValues)){
                 item { TopBar() }
+                item { Banner(banners, showBannerLoading  ) }
             }
         }
     }
