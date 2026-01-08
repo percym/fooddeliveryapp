@@ -1,5 +1,6 @@
 package dev.percym.fooddeliveryapp.Repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.DataSnapshot
@@ -9,32 +10,37 @@ import com.google.firebase.database.ValueEventListener
 import dev.percym.fooddeliveryapp.Domain.BannerModel
 
 class MainRepository {
-    private val firebaseDatabase= FirebaseDatabase.getInstance()
+    private val firebaseDatabase = FirebaseDatabase.getInstance()
 
-    fun loadBanner(): LiveData<MutableSet<BannerModel>> {
-        val listData= MutableLiveData<MutableSet<BannerModel>>()
-        val ref= firebaseDatabase.getReference("Banners")
+    fun loadBanner(): LiveData<List<BannerModel>> {
+        val listData = MutableLiveData<List<BannerModel>>()
+        val ref = firebaseDatabase.getReference("Banners")
 
-        ref.addValueEventListener(object :ValueEventListener {
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val list = mutableSetOf<BannerModel>()
-                    for (dataSnapshot in snapshot.children) {
-                        val item = dataSnapshot.getValue(BannerModel::class.java)
-                        item?.let { list.add(item) }
+                val list = mutableListOf<BannerModel>()
+                if (snapshot.exists()) {
+                    for (child in snapshot.children) {
+                        val item = child.getValue(BannerModel::class.java)
+                        if (item != null && !item.image.isNullOrBlank()) {
+                            list.add(item)
+                        } else {
+                            Log.d("MainRepository", "Skipping banner at ${child.key}: missing or empty image")
+                        }
                     }
-                    listData.value = list
+                } else {
+                    Log.d("MainRepository", "No banners found at Banners reference")
+                }
+                listData.postValue(list)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                System.out.printf(error.message)
+                Log.e("MainRepository", "loadBanner cancelled: ${error.message}", error.toException())
             }
-
-
         })
-        System.out.printf(listData.toString())
-    return listData
 
+        return listData
+    }
     }
 
 
-}

@@ -9,7 +9,7 @@ import dev.percym.fooddeliveryapp.Repository.MainRepository
 class MainViewModel : ViewModel(){
     private val repository = MainRepository()
 
-    fun loadBanner() : LiveData<MutableSet<BannerModel>> {
+    fun loadBanner() : LiveData<List<BannerModel>> {
         return repository.loadBanner()
     }
 
