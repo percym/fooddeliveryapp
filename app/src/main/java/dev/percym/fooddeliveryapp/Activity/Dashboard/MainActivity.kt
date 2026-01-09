@@ -16,9 +16,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import dev.percym.fooddeliveryapp.Activity.BaseActivity
 import dev.percym.fooddeliveryapp.Domain.BannerModel
+import dev.percym.fooddeliveryapp.Domain.CategoryModel
 import dev.percym.fooddeliveryapp.ViewModel.MainViewModel
 
 class MainActivity : BaseActivity() {
@@ -33,10 +35,14 @@ class MainActivity : BaseActivity() {
 
     @Composable
     fun MainScreen() {
-        val scaffoldState= rememberScaffoldState()
-        val banners= remember { mutableStateListOf<BannerModel>() }
+        val scaffoldState = rememberScaffoldState()
+        val banners = remember { mutableStateListOf<BannerModel>() }
+        val categories = remember { mutableStateListOf<CategoryModel>() }
+
         var showBannerLoading by remember { mutableStateOf(true) }
-        val viewModel= MainViewModel()
+        var showCategoryLoading by remember { mutableStateOf(true) }
+
+        val viewModel = MainViewModel()
         LaunchedEffect(Unit) {
             viewModel.loadBanner().observeForever {
                 banners.clear()
@@ -44,18 +50,30 @@ class MainActivity : BaseActivity() {
                 showBannerLoading = false
             }
         }
+
+        LaunchedEffect(Unit) {
+            viewModel.loadCategory().observeForever {
+                categories.clear()
+                categories.addAll(it)
+                showCategoryLoading = false
+            }
+        }
         Scaffold(
             bottomBar = { MyBottomBar() },
             scaffoldState = scaffoldState
-        ) {
-            paddingValues ->
-            LazyColumn(modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues= paddingValues)){
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = paddingValues)
+            ) {
                 item { TopBar() }
-                item { Banner(banners, showBannerLoading  ) }
+                item { Banner(banners, showBannerLoading) }
                 item { Search() }
+                item { CategorySection(categories, showCategoryLoading) }
             }
         }
     }
 }
+
+
