@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +21,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +51,19 @@ fun CategorySection(categories: SnapshotStateList<CategoryModel>, showCategoryLo
         ) {
             CircularProgressIndicator()
         }
+    } else if (categories.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No categories found",
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp
+            )
+        }
     } else {
         val rows = categories.chunked(3)
         Column(
@@ -60,18 +76,18 @@ fun CategorySection(categories: SnapshotStateList<CategoryModel>, showCategoryLo
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    row.forEachIndexed { index, categoryModel ->
+                    row.forEach { categoryModel ->
                         CategoryItem(
                             category = categoryModel,
                             modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 8.dp),
+                                .weight(1f),
                             onItemClick = {}
                         )
                     }
-                    if (row.size < 3) {
+                    // Add spacers for incomplete rows
+                    repeat(3 - row.size) {
                         Spacer(modifier = Modifier.weight(1f))
                     }
                 }
@@ -85,22 +101,32 @@ fun CategoryItem(category: CategoryModel, modifier: Modifier = Modifier, onItemC
     val context = LocalContext.current
     val imageUrl = category.ImagePath?.trim() ?: ""
 
-    Log.d("CategoryItem", "category='${category.Name}' url='$imageUrl' (empty=${imageUrl.isEmpty()})")
+    // Log only once per URL change
+    LaunchedEffect(imageUrl) {
+        Log.d("CategoryItem", "🔍 Loading: name='${category.Name}' url='$imageUrl'")
+    }
 
     val painter = rememberAsyncImagePainter(
-        ImageRequest.Builder(context)
-            .data(imageUrl.ifEmpty { null })
+        model = ImageRequest.Builder(context)
+            .data(imageUrl.takeIf { it.isNotBlank() })  // Only load if URL is not blank
             .crossfade(true)
-            .build()
+            .listener(
+                onStart = { Log.d("CategoryItem", "🖼️ Image request started: $imageUrl") },
+                onSuccess = { _, _ -> Log.d("CategoryItem", "🎉 Image loaded successfully: ${category.Name}") },
+                onError = { _, result -> Log.e("CategoryItem", "💥 Image load error: ${category.Name}", result.throwable) },
+                onCancel = { Log.w("CategoryItem", "🚫 Image load cancelled: ${category.Name}") }
+            )
+            .build(),
+        contentScale = ContentScale.Crop
     )
     val state = painter.state
 
-    LaunchedEffect(state) {
-        when (state) {
-            is AsyncImagePainter.State.Success -> Log.d("CategoryItem", "✓ image loaded for '${category.Name}'")
-            is AsyncImagePainter.State.Error -> Log.e("CategoryItem", "✗ image load failed for '${category.Name}': ${state.result.throwable?.message}")
-            else -> {}
-        }
+    // Log state transitions
+    when (state) {
+        is AsyncImagePainter.State.Success -> Log.d("CategoryItem", "✅ Loaded: ${category.Name}")
+        is AsyncImagePainter.State.Error -> Log.e("CategoryItem", "❌ Failed: ${category.Name} - ${state.result.throwable?.message}")
+        is AsyncImagePainter.State.Loading -> Log.d("CategoryItem", "⏳ Loading: ${category.Name}")
+        else -> {}
     }
 
     Column(
@@ -110,7 +136,13 @@ fun CategoryItem(category: CategoryModel, modifier: Modifier = Modifier, onItemC
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.size(80.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(color = colorResource(R.color.white)),
+            contentAlignment = Alignment.Center
+        ) {
             when (state) {
                 is AsyncImagePainter.State.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -129,7 +161,8 @@ fun CategoryItem(category: CategoryModel, modifier: Modifier = Modifier, onItemC
                     Image(
                         painter = painter,
                         contentDescription = category.Name,
-                        modifier = Modifier.size(80.dp)
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
                 }
                 else -> {}

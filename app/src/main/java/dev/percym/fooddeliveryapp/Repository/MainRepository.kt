@@ -71,17 +71,36 @@ class MainRepository {
                             "Category child key=${child.key}, raw=${child.value}"
                         )
                         val item = child.getValue(CategoryModel::class.java)
-                        if (item != null && !item.ImagePath.isNullOrBlank()) {
-                            Log.d(
-                                "MainRepository",
-                                "✓ Adding category '${item.Name}' with image '${item.ImagePath}'"
-                            )
+
+                        if (item == null) {
+                            Log.w("MainRepository", "❌ Failed to deserialize child ${child.key} to CategoryModel")
+                            continue
+                        }
+
+                        // If ImagePath is empty, try to extract from raw Firebase data with alternate field names
+                        if (item.ImagePath.isBlank()) {
+                            val rawMap = child.value as? Map<*, *>
+                            if (rawMap != null) {
+                                Log.d("MainRepository", "Attempting to find image via alternate field names...")
+                                val imagePath = (rawMap["imagePath"] as? String)
+                                    ?: (rawMap["image_path"] as? String)
+                                    ?: (rawMap["image"] as? String)
+                                    ?: ""
+                                if (imagePath.isNotBlank()) {
+                                    item.ImagePath = imagePath
+                                    Log.d("MainRepository", "✅ Found image via alternate field: $imagePath")
+                                }
+                            }
+                        }
+
+                        if (!item.ImagePath.isNullOrBlank()) {
+                            Log.d("MainRepository", "✅ Adding category: ${item.Name} -> ${item.ImagePath}")
                             list.add(item)
                         } else {
-                            Log.w(
-                                "MainRepository",
-                                "Skipping category ${child.key}: missing/blank ImagePath or deserialization failed. Check Firebase field names match CategoryModel (case-sensitive)."
-                            )
+                            // Add category even without image, but mark it for UI to show placeholder
+                            Log.w("MainRepository", "⚠️ Adding category without image: ${item.Name}")
+                            item.ImagePath = "" // Ensure it's empty string for UI handling
+                            list.add(item)
                         }
                     }
                 }
@@ -100,5 +119,3 @@ class MainRepository {
         return listData
     }
 }
-
-
