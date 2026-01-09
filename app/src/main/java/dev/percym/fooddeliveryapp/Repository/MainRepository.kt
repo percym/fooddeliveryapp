@@ -59,48 +59,13 @@ class MainRepository {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val list = mutableListOf<CategoryModel>()
                 if (!snapshot.exists()) {
-                    Log.d("MainRepository", "No categories found at Category reference")
+                    Log.d("MainRepository", "No categories found")
                 } else {
-                    Log.d(
-                        "MainRepository",
-                        "Category snapshot exists, children=${snapshot.childrenCount}"
-                    )
                     for (child in snapshot.children) {
-                        Log.d(
-                            "MainRepository",
-                            "Category child key=${child.key}, raw=${child.value}"
-                        )
                         val item = child.getValue(CategoryModel::class.java)
-
-                        if (item == null) {
-                            Log.w("MainRepository", "❌ Failed to deserialize child ${child.key} to CategoryModel")
-                            continue
-                        }
-
-                        // If ImagePath is empty, try to extract from raw Firebase data with alternate field names
-                        if (item.ImagePath.isBlank()) {
-                            val rawMap = child.value as? Map<*, *>
-                            if (rawMap != null) {
-                                Log.d("MainRepository", "Attempting to find image via alternate field names...")
-                                val imagePath = (rawMap["imagePath"] as? String)
-                                    ?: (rawMap["image_path"] as? String)
-                                    ?: (rawMap["image"] as? String)
-                                    ?: ""
-                                if (imagePath.isNotBlank()) {
-                                    item.ImagePath = imagePath
-                                    Log.d("MainRepository", "✅ Found image via alternate field: $imagePath")
-                                }
-                            }
-                        }
-
-                        if (!item.ImagePath.isNullOrBlank()) {
-                            Log.d("MainRepository", "✅ Adding category: ${item.Name} -> ${item.ImagePath}")
+                        if (item != null) {
                             list.add(item)
-                        } else {
-                            // Add category even without image, but mark it for UI to show placeholder
-                            Log.w("MainRepository", "⚠️ Adding category without image: ${item.Name}")
-                            item.ImagePath = "" // Ensure it's empty string for UI handling
-                            list.add(item)
+                            Log.d("MainRepository", "Category: ${item.Name}, Image: ${item.ImagePath}")
                         }
                     }
                 }
@@ -108,11 +73,7 @@ class MainRepository {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e(
-                    "MainRepository",
-                    "loadCategory cancelled: ${error.message}",
-                    error.toException()
-                )
+                Log.e("MainRepository", "loadCategory cancelled: ${error.message}", error.toException())
             }
         })
 

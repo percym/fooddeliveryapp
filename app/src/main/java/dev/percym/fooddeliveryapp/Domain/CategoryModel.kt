@@ -1,11 +1,7 @@
 package dev.percym.fooddeliveryapp.Domain
 
 data class CategoryModel(
-    var Id: Int ,
-    var ImagePath: String,
-    var Name: String ,
-
+    var Id: Int = 0,
+    var Name: String = "",
+    var ImagePath: String = ""
 )
-{
-    constructor() : this(0, "", "")
-}
